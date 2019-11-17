@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">TicTacToe</string>
+    <string name="restart">Рестарт</string>
+    <string name="text_X_win">Крестики победили!</string>
+    <string name="text_O_win">Нолики победили</string>
+    <string name="text_draw">Ничья</string>
 </resources>

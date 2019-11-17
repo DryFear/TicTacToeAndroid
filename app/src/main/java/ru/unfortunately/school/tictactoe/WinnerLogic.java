@@ -1,46 +1,52 @@
 package ru.unfortunately.school.tictactoe;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
-public class WinnerLogic {
+class WinnerLogic {
 
+    private static final String TAG = "TEST";
 
-    public static int checkWinner(@NonNull GridItemView[][] mas) throws Exception {
-        boolean isWin = true;
-
+    static int checkWinner(@NonNull GridItemView[][] mas){
         //Matrix correct check
-        int len = mas[0].length;
-        for (int i = 1; i < mas.length; i++){
-                if(mas[i].length != len){
-                    throw new Exception("Incorrect matrix size");
-                }
-        }
+        matrixCorrectCheck(mas);
+
         //Horizontal check
-        for(int i = 0; i < mas.length; i++){
-            int symbol = mas[i][0].getSymbol();
-            for (int j = 1; j < mas[i].length; j++) {
-                if(symbol != mas[i][j].getSymbol()){
-                    isWin = false;
-                }
-            }
-            if(isWin && symbol != -1){
-                return symbol;
-            }
-        }
+        Integer symbol1 = horizontalCheck(mas);
+        if (symbol1 != null) return symbol1;
+
         //Vertical check
-        isWin = true;
-        for(int i = 0; i < mas[0].length; i++){
-            int symbol = mas[0][i].getSymbol();
-            for (int j = 1; j < mas.length; j++) {
-                if(symbol != mas[j][i].getSymbol()){
-                    isWin = false;
+        Integer symbol2 = verticalCheck(mas);
+        if (symbol2 != null) return symbol2;
+
+        //Diagonal check
+        Integer symbol = diagonalCheck(mas);
+        if (symbol != null) return symbol;
+
+        //Is draw checking
+        boolean drawFlag = drawCheck(mas);
+        if(drawFlag){
+            return GridItemView.EMPTY_SYMBOL;
+        }
+
+        return -1;
+    }
+
+    private static boolean drawCheck(@NonNull GridItemView[][] mas) {
+        boolean drawFlag = true;
+        for (GridItemView[] ma : mas) {
+            for (GridItemView gridItemView : ma) {
+                if (gridItemView.getSymbol() == GridItemView.EMPTY_SYMBOL) {
+                    drawFlag = false;
                 }
             }
-            if(isWin && symbol != -1){
-                return symbol;
-            }
         }
-        //Diagonal check
+        return drawFlag;
+    }
+
+    private static Integer diagonalCheck(@NonNull GridItemView[][] mas) {
+        boolean isWin;
         isWin = true;
         if(mas.length == mas[0].length){
             int symbol = mas[0][0].getSymbol();
@@ -49,10 +55,14 @@ public class WinnerLogic {
                     isWin = false;
                 }
             }
-            if(isWin && symbol != -1){
+            if(isWin && symbol != GridItemView.EMPTY_SYMBOL){
+                for (int i = 0; i < mas.length; i++) {
+                    mas[i][i].makeItemWinner();
+                }
                 return symbol;
             }
         }
+
         isWin = true;
         if(mas.length == mas[0].length){
             int symbol = mas[0][mas[0].length-1].getSymbol();
@@ -61,11 +71,64 @@ public class WinnerLogic {
                     isWin = false;
                 }
             }
-            if(isWin && symbol != -1){
+            if(isWin && symbol != GridItemView.EMPTY_SYMBOL){
+                for (int i = 0; i < mas.length; i++) {
+                    mas[i][mas.length - 1 - i].makeItemWinner();
+                }
                 return symbol;
             }
         }
-        return -1;
+        return null;
+    }
+
+    private static Integer verticalCheck(@NonNull GridItemView[][] mas) {
+        boolean isWin;
+        for(int i = 0; i < mas[0].length; i++){
+            isWin = true;
+            int symbol = mas[0][i].getSymbol();
+            for (int j = 1; j < mas.length; j++) {
+                if(symbol != mas[j][i].getSymbol()){
+                    isWin = false;
+                }
+            }
+            if(isWin && symbol != GridItemView.EMPTY_SYMBOL){
+                for (GridItemView[] ma : mas) {
+                    ma[i].makeItemWinner();
+                }
+                return symbol;
+            }
+        }
+        return null;
+    }
+
+    private static void matrixCorrectCheck(@NonNull GridItemView[][] mas) {
+        int len = mas[0].length;
+        for (int i = 1; i < mas.length; i++){
+                if(mas[i].length != len){
+                    throw new RuntimeException("Incorrect matrix size");
+                }
+        }
+    }
+
+    private static Integer horizontalCheck(@NonNull GridItemView[][] mas) {
+        boolean isWin;
+        for (GridItemView[] ma : mas) {
+            isWin = true;
+            int symbol = ma[0].getSymbol();
+            for (int j = 1; j < ma.length; j++) {
+                if (symbol != ma[j].getSymbol()) {
+                    isWin = false;
+                }
+            }
+            if (symbol != GridItemView.EMPTY_SYMBOL && isWin) {
+                for (GridItemView gridItemView : ma) {
+                    gridItemView.makeItemWinner();
+                    Log.i(TAG, "horizontalCheck:");
+                }
+                return symbol;
+            }
+        }
+        return null;
     }
 
 }
